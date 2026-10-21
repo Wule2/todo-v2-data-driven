@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo V2.2 事件委托版</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 16px;
+      color: #333;
+    }
+    h1 { font-size: 20px; }
+    #todo-form { display: flex; gap: 8px; }
+    #todo-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #todo-form button, .filter-btn, .delete-btn {
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+    #todo-form button { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+    #todo-list { list-style: none; padding: 0; }
+    #todo-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    /* 完成态删除线（沿用 V2.1 修正：选择器与真实 DOM 结构匹配） */
+    #todo-list li.completed { text-decoration: line-through; color: #999; }
+    .filter-bar { margin-top: 16px; display: flex; gap: 8px; }
+    .filter-btn.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+  </style>
+</head>
+<body>
+  <h1>Todo 列表（数据驱动 V2.2 事件委托版）</h1>
+
+  <form id="todo-form">
+    <input id="todo-input" placeholder="要做点什么？">
+    <button type="submit">添加</button>
+  </form>
+
+  <!-- 事件委托的目标容器：li 的点击/删除统一在这里监听，render 不再逐个绑定 -->
+  <ul id="todo-list"></ul>
+
+  <div class="filter-bar">
+    <button class="filter-btn" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="active">未完成</button>
+    <button class="filter-btn" data-filter="completed">已完成</button>
+  </div>
+
+  <script src="todo3.js"></script>
+</body>
+</html>
