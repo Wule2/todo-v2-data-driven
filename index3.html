@@ -20,7 +20,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    #todo-form button, .filter-btn, .delete-btn {
+    #todo-form button, .filter-btn, .delete-btn, .edit-btn {
       padding: 6px 12px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -36,7 +36,10 @@
       padding: 8px 4px;
       border-bottom: 1px solid #eee;
       cursor: pointer;
+      gap: 8px
     }
+    .edit-btn { margin-left: auto; }
+
     /* 完成态删除线（沿用 V2.1 修正：选择器与真实 DOM 结构匹配） */
     #todo-list li.completed { text-decoration: line-through; color: #999; }
     .filter-bar { margin-top: 16px; display: flex; gap: 8px; }

@@ -63,6 +63,12 @@ function render() {
     delBtn.className = 'delete-btn';
     delBtn.dataset.action = 'delete'; // 委托时靠这个属性识别"删除"操作
 
+    const editBtn = document.createElement('button'); 
+    editBtn.textContent = '编辑';                     
+    editBtn.className = 'edit-btn';                   
+    editBtn.dataset.action = 'edit';                  
+
+    li.appendChild(editBtn); 
     li.appendChild(delBtn);
     list.appendChild(li);
   });
@@ -105,6 +111,23 @@ function toggleTodo(id) {
   save();   // 2. 保存
   render(); // 3. 重渲染
 }
+
+function editTodo(id) {
+  
+  const currentTodo = state.todos.find(todo => todo.id === id);
+  if (!currentTodo) return; 
+  const newText = prompt('修改任务内容：', currentTodo.text);
+  if (newText === null) return; 
+  const trimmed = newText.trim();
+  if (!trimmed) return;
+
+  state.todos = state.todos.map(todo =>
+    todo.id === id ? { ...todo, text: trimmed } : todo
+  );
+  save();   
+  render(); 
+}
+
 
 // 切换筛选视图：同样遵循三步
 function setFilter(filter) {
@@ -161,6 +184,12 @@ document.getElementById('todo-list').addEventListener('click', (e) => {
     removeTodo(id);
     return; // 删除后不再往下走，避免顺手触发 toggle
   }
+
+  if (e.target.closest('[data-action="edit"]')) {
+    editTodo(id);
+    return;
+  }
+
   toggleTodo(id); // 点 li 其余区域：切换完成状态
 });
 
@@ -181,8 +210,9 @@ loadState();
 render();
 
 // ┌──────────────────────────────────────────────────────────────┐
-// │ 「编辑」功能（下一分支计划）                                     │
-// │ 状态：由本人独立完成，全程未使用 AI。                            │
-// │ 落点：render() 中为每个 li 增加编辑入口（data-action="edit"）、   │
-// │      上方事件委托中增加对应分支、并新增一个 updateTodo 操作函数。  │
+// │ 「编辑」功能（已完成）                                          │
+// │ 代码由本人逐行手写；实现思路参考过 AI 讲解，已按作业表要求披露。   │
+// │ 实现：render 编辑按钮（data-action="edit"）+ 委托 edit 分支     │
+// │       + editTodo（find → prompt → 取消/空值防御 → map 更新      │
+// │       text → save + render）。取证见 tests/。                   │
 // └──────────────────────────────────────────────────────────────┘

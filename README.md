@@ -49,8 +49,13 @@
   3. **修复**：`if (!li) return;` 空值防御 + `Number(li.dataset.id)` 类型转换；
   4. **测试（修复后）**：空白区点击无报错无操作；删除后剩 0 条；
      toggle 后 `completed=true`，全部通过；
-- **待独立完成（禁用 AI）**：「编辑」分支——在 `todo3.js` 末尾标记处由本人
-  自行补充（render 加编辑入口、委托加分支、新增 `updateTodo`）。
+- **独立完成（禁用 AI 写代码）**：「编辑」功能——`render` 加编辑入口
+  （`data-action="edit"`）、事件委托加 `edit` 分支（置于 `toggle` 之前）、
+  `editTodo`（`find` 取当前条目 → `prompt` 输入 → 取消/空值防御 →
+  `map` 更新 `text` → 保存重渲染）。代码逐行手写；实现思路参考过 AI
+  讲解，已按作业表要求披露；
+- **测试取证**：`tests/delegation-test.js`（V2.2 委托两轮缺陷复现）、
+  `tests/defect-test.js`（作业给定缺陷代码诊断），`node tests/xxx.js` 运行。
 
 ## 验证方法
 
