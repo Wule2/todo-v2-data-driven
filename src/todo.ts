@@ -110,15 +110,25 @@ export function getVisibleTodos(): Todo[] {
   return state.todos;
 }
 
+// ---- 输入净化（业务契约：注入代码不允许原样存入）----
+// 移除成对的 <script>...</script>（连内容）以及残留的孤立标签
+function stripScriptTags(text: string): string {
+  return text
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<\/?script\b[^>]*>/gi, '');
+}
+
 // ---- 操作函数：改数据 → save() → 返回结果（渲染交给 DOM 层）----
 // 返回值设计成可断言的形态，方便单测验证"数据真的变了"
 
-// 添加：成功返回新条目，空文本返回 null
+// 添加：成功返回新条目；空文本与注入代码返回 null
 export function addTodo(text: string): Todo | null {
-  const trimmed = text.trim();
-  if (trimmed === '') return null;
+  // TS 类型只是编译期约束，挡不住 JS 调用方在运行时塞进 null 等脏值
+  if (typeof text !== 'string') return null;
+  const cleaned = stripScriptTags(text).trim();
+  if (cleaned === '') return null;
   const maxId = state.todos.reduce((max, t) => Math.max(max, t.id), 0);
-  const newTodo: Todo = { id: maxId + 1, text: trimmed, completed: false };
+  const newTodo: Todo = { id: maxId + 1, text: cleaned, completed: false };
   state.todos = [...state.todos, newTodo];
   save();
   return newTodo;
@@ -143,9 +153,10 @@ export function removeTodo(id: number): boolean {
   return true;
 }
 
-// 编辑文本：空文本与不存在的 id 都返回 null
+// 编辑文本：空文本、注入代码与不存在的 id 都返回 null（审查补齐：编辑是另一条注入路径）
 export function updateTodoText(id: number, text: string): Todo | null {
-  const trimmed = text.trim();
+  if (typeof text !== 'string') return null;
+  const trimmed = stripScriptTags(text).trim();
   if (trimmed === '') return null;
   const target = state.todos.find((t) => t.id === id);
   if (target === undefined) return null;
