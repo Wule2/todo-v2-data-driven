@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo V3.0 TypeScript 版</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 16px;
+      color: #333;
+    }
+    h1 { font-size: 20px; }
+    #todo-form { display: flex; gap: 8px; }
+    #todo-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #todo-form button, .filter-btn, .delete-btn, .edit-btn {
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+    #todo-form button { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+    #todo-list { list-style: none; padding: 0; }
+    #todo-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 4px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    #todo-list li.completed { text-decoration: line-through; color: #999; }
+    .edit-btn { margin-left: auto; }
+    .filter-bar { margin-top: 16px; display: flex; gap: 8px; }
+    .filter-btn.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+    #clear-completed { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Todo 列表（TypeScript V3.0）</h1>
+
+  <form id="todo-form">
+    <input id="todo-input" placeholder="要做点什么？">
+    <button type="submit">添加</button>
+  </form>
+
+  <!-- 事件委托的目标容器：li 的点击/删除/编辑统一在这里监听 -->
+  <ul id="todo-list"></ul>
+
+  <div class="filter-bar">
+    <button class="filter-btn" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="active">未完成</button>
+    <button class="filter-btn" data-filter="completed">已完成</button>
+  </div>
+
+  <button id="clear-completed">清除已完成</button>
+
+  <!-- V3.0：加载 src/main.ts 经 esbuild 打包后的产物（需先 npm run build） -->
+  <script type="module" src="./dist/main.js"></script>
+</body>
+</html>
