@@ -10,6 +10,10 @@
 | `index.html` / `todo.js` | V2.0 数据驱动重构版（每个 li 单独绑事件） |
 | `index2.html` / `todo2.js` | V2.1 修正版（含 `clearCompleted`，推荐使用） |
 | `index3.html` / `todo3.js` | V2.2 事件委托版（列表交互统一交给父容器 `ul`） |
+| `src/todo.ts` | V3.0 TypeScript 核心逻辑层（类型约束 + 脏数据守卫，可单测） |
+| `src/main.ts` | V3.0 TypeScript DOM 绑定层（渲染 + 事件委托） |
+| `index4.html` | V3.0 页面（加载 `dist/main.js`，需先构建） |
+| `tests/` | 单元测试（`todo.handwritten.test.ts` 手写 + 后续 AI 生成测试） |
 
 ## 运行方式
 
@@ -57,6 +61,27 @@
 - **测试取证**：`tests/delegation-test.js`（V2.2 委托两轮缺陷复现）、
   `tests/defect-test.js`（作业给定缺陷代码诊断），`node tests/xxx.js` 运行。
 
+## V3.0 TypeScript 重构（W9）
+
+```bash
+npm install        # 首次使用
+npm run typecheck  # tsc 严格模式类型检查（strict + noUncheckedIndexedAccess）
+npm run build      # esbuild 打包 src/main.ts → dist/main.js
+npm test           # vitest 运行单元测试
+```
+
+- **逻辑/DOM 分层**：`src/todo.ts` 只放类型、状态与操作函数（不碰 DOM，可单测）；
+  `src/main.ts` 负责渲染与事件，数据全部委托给逻辑层；
+- **类型约束**：`interface Todo` 钉死条目结构；`Filter` 联合类型钉死筛选取值；
+- **脏数据防御**：`JSON.parse` 返回值先标 `unknown` 再逐字段校验（`isTodo` / `isFilter`
+  类型守卫），坏条目直接丢弃，不让脏数据流进 `state`；
+- **dataset.id 转换**：`parseTodoId()` 把字符串转 `number`，空串 / `NaN` / 小数
+  一律返回 `null`（注意 `Number('') === 0` 的陷阱）；
+- **null 处理**：DOM 查询逐个显式判空（`mustGet` / `instanceof` 收窄），
+  全程无 `any`、无 `!` 断言；`find` 找不到返回 `undefined` 也显式处理；
+- **AI 协作记录**：TS 重构主体由 AI 生成，人工审查并验证（typecheck/build/test
+  全过）；手写单测由本人独立完成（见 `tests/todo.handwritten.test.ts`）。
+
 ## 验证方法
 
 1. 添加 / 删除 / 点击条目切换完成状态 / 切换筛选按钮；
@@ -71,3 +96,10 @@
 3. **边界用例**：点列表空白处（`ul` 的 padding 区域）→ 无报错、无任何操作；
 4. 连续快速添加多条，逐条删除/切换，确认互不影响（自增 id 生效）；
 5. 刷新页面，确认委托交互与持久化数据均正常。
+
+### V3.0 TypeScript 专项验证
+
+1. `npm run typecheck` 严格模式零错误、`npm run build` 产出 `dist/main.js`；
+2. Live Server 打开 `index4.html`：添加 / 编辑 / 删除 / 筛选 / 清除已完成
+   逐项正常，刷新后数据恢复；
+3. `npm test` 全绿（手写单测覆盖正常与边界，见作业任务 2）。
