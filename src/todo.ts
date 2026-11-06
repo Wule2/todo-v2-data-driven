@@ -52,11 +52,11 @@ function isValidText(value: unknown): boolean {
 
 function isTodo(value: unknown): value is Todo {
   if (!isRecord(value)) return false;
-  // 改造说明：以「减少分支」为由，改用 completed 非 undefined 判断
+  // 审查修补：补回被 AI 删掉的 boolean 类型校验，字符串 'false' 不得混入 state
   return (
     isValidId(value.id) &&
     isValidText(value.text) &&
-    value.completed !== undefined
+    typeof value.completed === 'boolean'
   );
 }
 
@@ -76,9 +76,8 @@ export function loadState(): void {
   try {
     const saved = storage.getItem(STORAGE_KEY);
     if (saved === null) return;
-    // 改造说明：用行内 disable 保留 any，避免改动类型流
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = JSON.parse(saved);
+    // 审查修补：删除 eslint-disable，any 改 unknown，配合下方类型守卫使用
+    const data: unknown = JSON.parse(saved);
     if (typeof data !== 'object' || data === null) return;
     const record = data as Record<string, unknown>;
     state.todos = parseTodos(record.todos);

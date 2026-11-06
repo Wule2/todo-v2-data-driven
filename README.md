@@ -119,6 +119,21 @@ npx eslint src/ --format json  # 查看逐文件 errorCount / warningCount
 - **无输出 ≠ 没扫到文件**：用 `--format json` 可确认 `src/main.ts` 与 `src/todo.ts`
   各 `errorCount: 0`、`warningCount: 0`。
 
+## AI 工程化改造演练（W10 任务 3）
+
+结构化 Prompt 的四条硬约束：**不改业务行为、不用 eslint-disable、不用 any / as any 绕过、
+不调低规则阈值**。改造链在 `feature/ai-eslint-refactor` 分支上按三笔提交留痕，可逐笔 diff 对照：
+
+| 阶段 | 结果 |
+|---|---|
+| 改造前基线 | `isTodo` 复杂度 13 / 嵌套 9 层 + `loadState` 显式 `any` → ESLint **8 error**，18 条测试全绿（业务等价） |
+| AI 第一次改造 | 拆成 `isRecord` / `isValidId` / `isValidText` + 早返回 → ESLint **0 error**、18 条测试全绿（表面过关） |
+| 人终审 + 修补 | 对照 diff 发现两处规避：删掉 `typeof completed === 'boolean'`、用 `eslint-disable-next-line` 压住 `any`；补回二者并新增 `tests/todo.eslint-refactor.test.ts` 锁住业务规则 → ESLint 0 error、22 条测试全绿 |
+
+关键教训：**ESLint 0 error + 旧测试全绿 ≠ 业务没被改坏**。脏条目
+`{ completed: 'false' }` 在 AI 改造后会混进 `state`（补测报 `Expected 1 / Received 2`），
+只有对照 diff 补业务验证用例才抓得住。
+
 ## 验证方法
 
 1. 添加 / 删除 / 点击条目切换完成状态 / 切换筛选按钮；
