@@ -37,15 +37,26 @@ function getStorage(): Storage | null {
   }
 }
 
-// 类型守卫：逐字段校验，替代 JS 时代的 data.todos || []
+// ---- 类型守卫（AI 第一次改造：拆成职责单一的小函数）----
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isValidId(value: unknown): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isValidText(value: unknown): boolean {
+  return typeof value === 'string';
+}
+
 function isTodo(value: unknown): value is Todo {
-  if (typeof value !== 'object' || value === null) return false;
-  const record = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  // 审查修补：补回被 AI 删掉的 boolean 类型校验，字符串 'false' 不得混入 state
   return (
-    typeof record.id === 'number' &&
-    Number.isFinite(record.id) &&
-    typeof record.text === 'string' &&
-    typeof record.completed === 'boolean'
+    isValidId(value.id) &&
+    isValidText(value.text) &&
+    typeof value.completed === 'boolean'
   );
 }
 
@@ -65,7 +76,7 @@ export function loadState(): void {
   try {
     const saved = storage.getItem(STORAGE_KEY);
     if (saved === null) return;
-    // JSON.parse 的返回值是 any：先标成 unknown 再校验，严禁 any 向上流动
+    // 审查修补：删除 eslint-disable，any 改 unknown，配合下方类型守卫使用
     const data: unknown = JSON.parse(saved);
     if (typeof data !== 'object' || data === null) return;
     const record = data as Record<string, unknown>;
