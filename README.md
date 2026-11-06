@@ -72,6 +72,13 @@ npm run preview    # 预览构建产物
 npm test           # vitest run（作业固定脚本）
 ```
 
+> **重要：Vite 页面不能双击打开，也不能用 Live Server 直接开 `index4.html`。**
+> `index4.html` 引用的是 `/src/main.ts`，只有 Vite dev server 会把它编译成 JS；
+> `file://` 或普通静态服务器下脚本加载失败，页面能显示但按钮全部没反应
+> （Console 会报 `ERR_FILE_NOT_FOUND` 或 `Unexpected token ':'`）。
+> 必须走 `npm run dev` 或 `npm run preview` 给出的 http 地址，且路径带 `/index4.html`
+> （根目录 `index.html` 是 W8 的历史页面，不是 Vite 入口）。
+
 - **V3.1 迁移到真实 Vite 工程**：`index4.html` 直接挂 `/src/main.ts`，dev 阶段无需
   预构建；`vite.config.ts` 把构建入口指向 `index4.html`（根目录其余历史页面不参与）；
   `package.json` 按要求固定 `build` / `test` 两条脚本，`tsconfig.json` 维持 `strict: true`；
