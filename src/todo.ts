@@ -37,16 +37,32 @@ function getStorage(): Storage | null {
   }
 }
 
-// 类型守卫：逐字段校验，替代 JS 时代的 data.todos || []
+// 类型守卫（AI 初稿：层层嵌套 + 冗余判断；业务与扁平版等价，但复杂度/深度超标）
 function isTodo(value: unknown): value is Todo {
-  if (typeof value !== 'object' || value === null) return false;
-  const record = value as Record<string, unknown>;
-  return (
-    typeof record.id === 'number' &&
-    Number.isFinite(record.id) &&
-    typeof record.text === 'string' &&
-    typeof record.completed === 'boolean'
-  );
+  if (typeof value === 'object') {
+    if (value !== null) {
+      if (!Array.isArray(value)) {
+        const record = value as Record<string, unknown>;
+        const id: unknown = record.id;
+        const text: unknown = record.text;
+        const completed: unknown = record.completed;
+        if (typeof id === 'number') {
+          if (Number.isFinite(id) || id === 0) {
+            if (typeof text === 'string' || text === '') {
+              if (text !== undefined) {
+                if (typeof completed === 'boolean') {
+                  if (completed === true || completed === false) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 function isFilter(value: unknown): value is Filter {
@@ -65,8 +81,8 @@ export function loadState(): void {
   try {
     const saved = storage.getItem(STORAGE_KEY);
     if (saved === null) return;
-    // JSON.parse 的返回值是 any：先标成 unknown 再校验，严禁 any 向上流动
-    const data: unknown = JSON.parse(saved);
+    // AI 初稿：直接把 JSON.parse 结果标成 any（触发 no-explicit-any）
+    const data: any = JSON.parse(saved);
     if (typeof data !== 'object' || data === null) return;
     const record = data as Record<string, unknown>;
     state.todos = parseTodos(record.todos);
