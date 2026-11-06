@@ -108,7 +108,10 @@ npx eslint src/ --format json  # 查看逐文件 errorCount / warningCount
 - 配置：`.eslintrc.cjs`，三条规则 `complexity: ['error', 10]`、
   `max-depth: ['error', 3]`、`@typescript-eslint/no-explicit-any: 'error'`；
 - **锁 ESLint 8**：v9 起默认 flat config（`eslint.config.js`），传统 `.eslintrc.cjs`
-  需额外兼容开关；配套 `@typescript-eslint/parser` / `eslint-plugin` v7；
+  需额外兼容开关；配套 `@typescript-eslint/parser` / `eslint-plugin` v8；
+- **工具链版本必须匹配**：`@typescript-eslint` v7 只官方支持 TS `<5.6.0`，
+  项目用的是 TS 5.9.3，`npx eslint src/` 会在顶部打印一整段 UNSUPPORTED 警告；
+  升级到 v8（支持 TS 5.9 且仍兼容 eslintrc）后输出恢复干净；
 - **必须用 `.cjs` 后缀**：`package.json` 是 `"type": "module"`，写成 `.eslintrc.js`
   会导致 `module.exports` 报 `module is not defined`；
 - **`overrides` 的 `files: ['**/*.ts']`**：ESLint 8 对目录参数默认只遍历 `.js`，
