@@ -12,8 +12,9 @@
 | `index3.html` / `todo3.js` | V2.2 事件委托版（列表交互统一交给父容器 `ul`） |
 | `src/todo.ts` | V3.0 TypeScript 核心逻辑层（类型约束 + 脏数据守卫，可单测） |
 | `src/main.ts` | V3.0 TypeScript DOM 绑定层（渲染 + 事件委托） |
-| `index4.html` | V3.0 页面（加载 `dist/main.js`，需先构建） |
-| `tests/` | 单元测试（`todo.handwritten.test.ts` 手写 + 后续 AI 生成测试） |
+| `index4.html` | V3.1 Vite 入口页面（直接挂 `/src/main.ts`，dev 免构建） |
+| `vite.config.ts` | Vite 配置（构建入口指定为 `index4.html`） |
+| `tests/` | 单元测试（`todo.handwritten.test.ts` 手写 + `todo.ai-generated.test.ts` AI 生成与审查补测） |
 
 ## 运行方式
 
@@ -61,14 +62,22 @@
 - **测试取证**：`tests/delegation-test.js`（V2.2 委托两轮缺陷复现）、
   `tests/defect-test.js`（作业给定缺陷代码诊断），`node tests/xxx.js` 运行。
 
-## V3.0 TypeScript 重构（W9）
+## V3.0 TypeScript 重构（W9）/ V3.1 Vite 工程（W10）
 
 ```bash
 npm install        # 首次使用
-npm run typecheck  # tsc 严格模式类型检查（strict + noUncheckedIndexedAccess）
-npm run build      # esbuild 打包 src/main.ts → dist/main.js
-npm test           # vitest 运行单元测试
+npm run dev        # Vite 开发服务器：打开 http://localhost:5173/index4.html
+npm run build      # tsc --noEmit && vite build（作业固定脚本）
+npm run preview    # 预览构建产物
+npm test           # vitest run（作业固定脚本）
 ```
+
+- **V3.1 迁移到真实 Vite 工程**：`index4.html` 直接挂 `/src/main.ts`，dev 阶段无需
+  预构建；`vite.config.ts` 把构建入口指向 `index4.html`（根目录其余历史页面不参与）；
+  `package.json` 按要求固定 `build` / `test` 两条脚本，`tsconfig.json` 维持 `strict: true`；
+  - **`tsconfig.json` 严格模式**：`strict: true` + `noUncheckedIndexedAccess` 等，
+  `build` 里先跑 `tsc --noEmit` 把类型错误挡在构建之前；
+  - **vitest 共用 Vite 配置**：测试无需单独转换器，18 条用例在 Vite 工程内直接跑；
 
 - **逻辑/DOM 分层**：`src/todo.ts` 只放类型、状态与操作函数（不碰 DOM，可单测）；
   `src/main.ts` 负责渲染与事件，数据全部委托给逻辑层；
@@ -97,9 +106,10 @@ npm test           # vitest 运行单元测试
 4. 连续快速添加多条，逐条删除/切换，确认互不影响（自增 id 生效）；
 5. 刷新页面，确认委托交互与持久化数据均正常。
 
-### V3.0 TypeScript 专项验证
+### V3.0 TypeScript / V3.1 Vite 专项验证
 
-1. `npm run typecheck` 严格模式零错误、`npm run build` 产出 `dist/main.js`；
-2. Live Server 打开 `index4.html`：添加 / 编辑 / 删除 / 筛选 / 清除已完成
-   逐项正常，刷新后数据恢复；
-3. `npm test` 全绿（手写单测覆盖正常与边界，见作业任务 2）。
+1. `npm run build` 先 `tsc --noEmit` 零类型错误、再由 `vite build` 产出
+   `dist/index4.html` + `dist/assets/todo-*.js`；
+2. `npm run dev`（或构建后 `npm run preview`）打开 `index4.html`：添加 / 编辑 /
+   删除 / 筛选 / 清除已完成逐项正常，刷新后数据恢复；
+3. `npm test` 全绿（手写 9 条 + AI 生成与审查补测 9 条，共 18 条）。

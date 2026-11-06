@@ -64,7 +64,7 @@
 
   <button id="clear-completed">清除已完成</button>
 
-  <!-- V3.0：加载 src/main.ts 经 esbuild 打包后的产物（需先 npm run build） -->
-  <script type="module" src="./dist/main.js"></script>
+  <!-- V3.1 Vite 工程：dev 时 Vite 直接编译 /src/main.ts；build 时打包进 dist/ -->
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
