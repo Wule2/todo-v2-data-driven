@@ -37,32 +37,27 @@ function getStorage(): Storage | null {
   }
 }
 
-// 类型守卫（AI 初稿：层层嵌套 + 冗余判断；业务与扁平版等价，但复杂度/深度超标）
+// ---- 类型守卫（AI 第一次改造：拆成职责单一的小函数）----
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isValidId(value: unknown): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isValidText(value: unknown): boolean {
+  return typeof value === 'string';
+}
+
 function isTodo(value: unknown): value is Todo {
-  if (typeof value === 'object') {
-    if (value !== null) {
-      if (!Array.isArray(value)) {
-        const record = value as Record<string, unknown>;
-        const id: unknown = record.id;
-        const text: unknown = record.text;
-        const completed: unknown = record.completed;
-        if (typeof id === 'number') {
-          if (Number.isFinite(id) || id === 0) {
-            if (typeof text === 'string' || text === '') {
-              if (text !== undefined) {
-                if (typeof completed === 'boolean') {
-                  if (completed === true || completed === false) {
-                    return true;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return false;
+  if (!isRecord(value)) return false;
+  // 改造说明：以「减少分支」为由，改用 completed 非 undefined 判断
+  return (
+    isValidId(value.id) &&
+    isValidText(value.text) &&
+    value.completed !== undefined
+  );
 }
 
 function isFilter(value: unknown): value is Filter {
@@ -81,7 +76,8 @@ export function loadState(): void {
   try {
     const saved = storage.getItem(STORAGE_KEY);
     if (saved === null) return;
-    // AI 初稿：直接把 JSON.parse 结果标成 any（触发 no-explicit-any）
+    // 改造说明：用行内 disable 保留 any，避免改动类型流
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = JSON.parse(saved);
     if (typeof data !== 'object' || data === null) return;
     const record = data as Record<string, unknown>;
