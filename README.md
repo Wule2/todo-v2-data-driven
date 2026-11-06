@@ -98,6 +98,24 @@ npm test           # vitest run（作业固定脚本）
 - **AI 协作记录**：TS 重构主体由 AI 生成，人工审查并验证（typecheck/build/test
   全过）；手写单测由本人独立完成（见 `tests/todo.handwritten.test.ts`）。
 
+## ESLint 配置（W10 任务 2）
+
+```bash
+npx eslint src/                # 0 error、0 warning（静默通过，退出码 0）
+npx eslint src/ --format json  # 查看逐文件 errorCount / warningCount
+```
+
+- 配置：`.eslintrc.cjs`，三条规则 `complexity: ['error', 10]`、
+  `max-depth: ['error', 3]`、`@typescript-eslint/no-explicit-any: 'error'`；
+- **锁 ESLint 8**：v9 起默认 flat config（`eslint.config.js`），传统 `.eslintrc.cjs`
+  需额外兼容开关；配套 `@typescript-eslint/parser` / `eslint-plugin` v7；
+- **必须用 `.cjs` 后缀**：`package.json` 是 `"type": "module"`，写成 `.eslintrc.js`
+  会导致 `module.exports` 报 `module is not defined`；
+- **`overrides` 的 `files: ['**/*.ts']`**：ESLint 8 对目录参数默认只遍历 `.js`，
+  加上它 `npx eslint src/` 才会扫描 TS 文件；
+- **无输出 ≠ 没扫到文件**：用 `--format json` 可确认 `src/main.ts` 与 `src/todo.ts`
+  各 `errorCount: 0`、`warningCount: 0`。
+
 ## 验证方法
 
 1. 添加 / 删除 / 点击条目切换完成状态 / 切换筛选按钮；
